@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -21,12 +21,14 @@ namespace PlaneController.Model
             keepRunning = false;
         }
 
-        // Throws Exception.
-        // Establish the remote endpoint for the socket.
-        public void Connect(string ip, int port)
+        /*
+         * Establish the remote endpoint for the socket.
+         * Throws Exception.
+         */
+        public void Connect(string ip, string port)
         {
             IPAddress ipAddress = IPAddress.Parse(ip);
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, Convert.ToInt32(port));
 
             // Create a TCP/IP  socket.
             this.sender = new Socket(ipAddress.AddressFamily,
@@ -38,6 +40,11 @@ namespace PlaneController.Model
             this.keepRunning = true;
         }
 
+        /*
+         * Loop that send set and get commands to plane.
+         * Use messageQueue to get set commands.
+         * Get messages are a defined routine given in messageByte array.
+         */
         public void Run()
         {
             byte[] bytes = new byte[1024];
@@ -85,6 +92,9 @@ namespace PlaneController.Model
                         // Convert to bytes and send to server.
                         byte[] command = Encoding.ASCII.GetBytes(message);
                         this.sender.Send(command);
+
+                        // To empty buffer.
+                        bytesRec = sender.Receive(bytes);
                     }
                 }
 
@@ -93,7 +103,7 @@ namespace PlaneController.Model
             // Release the socket.  
             sender.Shutdown(SocketShutdown.Both);
             sender.Close();
-        }
+        }// End of run.
 
         // Disconnect client from server.
         public void Stop()
@@ -106,14 +116,18 @@ namespace PlaneController.Model
             this.errorAction = action;
         }
 
-        // Routine is an array of strings where each string is a command to send server.
-        // Another array of lambdas define what to do with the answer from the server.
-        // Messages are converted for array of byte for TCP protocol.
+        /*
+         * Routine is an array of strings where each string is a command to send server.
+         * Another array of lambdas define what to do with the answer from the server.
+         * Messages are converted for array of byte for TCP protocol.
+         */
         public void SetRoutine(string[] messages, Action<double>[] lambdas)
         {
             int len = messages.Length;
 
-            if (len != lambdas.Length) { SetRoutineError(); }
+            this.messagesBytes = new byte[len][];
+
+            if (len != lambdas.Length) { RoutineErrorHelper(); }
 
             for (int i = 0; i < len; i++)
             {
@@ -123,7 +137,7 @@ namespace PlaneController.Model
                 }
                 else
                 {
-                    this.SetRoutineError();
+                    this.RoutineErrorHelper();
                 }
 
             }
@@ -131,7 +145,7 @@ namespace PlaneController.Model
             this.lambdas = lambdas;
         }
 
-        private void SetRoutineError()
+        private void RoutineErrorHelper()
         {
             throw new Exception("illegal string / lambda array");
         }
