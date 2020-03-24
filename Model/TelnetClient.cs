@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace PlaneController.Model
 {
@@ -10,7 +11,7 @@ namespace PlaneController.Model
         private Boolean keepRunning;
         private byte[][] messagesBytes;
         private Action<double>[] lambdas;
-        private Action errorAction;
+        private Action<string> errorAction;
 
         //IPEndPoint endPoint;
         Socket sender;
@@ -47,37 +48,20 @@ namespace PlaneController.Model
          */
         public void Run()
         {
+            Thread t;
             byte[] bytes = new byte[1024];
             MessageQueue queue = MessageQueue.GetInstance();
-            int i, bytesRec, len = lambdas.Length;
-            double answer;
+            int i, len = lambdas.Length;
             string message;
 
             while (this.keepRunning)
             {
                 for (i = 0; i < len; i++)
                 {
-                    // Send the data through the socket.  
-                    this.sender.Send(messagesBytes[i]);
-
-                    // Receive the response from the server.
-                    bytesRec = sender.Receive(bytes);
-
-                    message = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-
-                    // Execute compatible lambda function.
-                    try
-                    {
-                        answer = Convert.ToDouble(message);
-                        lambdas[i](answer);
-                    }
-                    catch (FormatException e)
-                    {
-                        if (this.errorAction != null) { this.errorAction(); }
-                    }
+                    t = new Thread(() => StandardGetCommand(i));
+                    wait10Sec(t);
                 }
 
-                // To send maximum 8 set messages in a row.
                 while (i-- > 0)
                 {
                     if (queue.Empty())
@@ -89,12 +73,8 @@ namespace PlaneController.Model
 
                     if (message != null)
                     {
-                        // Convert to bytes and send to server.
-                        byte[] command = Encoding.ASCII.GetBytes(message);
-                        this.sender.Send(command);
-
-                        // To empty buffer.
-                        bytesRec = sender.Receive(bytes);
+                        t = new Thread(() => StandardSetCommand(message));
+                        wait10Sec(t);
                     }
                 }
 
@@ -111,9 +91,63 @@ namespace PlaneController.Model
             this.keepRunning = false;
         }
 
-        public void SetDefaultErrorAction(Action action)
+        public void SetDefaultErrorAction(Action<string> action)
         {
             this.errorAction = action;
+        }
+
+        /*
+         * Execute a thread, if it takes more than 10 sec,
+         * An event of errorAction is called.
+         */
+        private void wait10Sec(Thread t)
+        {
+            t.Start();
+
+            if (!t.Join(TimeSpan.FromSeconds(10)))
+            {
+                t.Abort();
+                this.errorAction("More then 10 seconds");
+            }
+        }
+
+        // Get a string and execute one get command to plane.
+        private void StandardSetCommand(string message)
+        {
+            byte[] bytes = new byte[1024];
+
+            // Convert to bytes and send to server.
+            byte[] command = Encoding.ASCII.GetBytes(message);
+            this.sender.Send(command);
+
+            // To empty buffer.
+            int bytesRec = sender.Receive(bytes);
+        }
+
+        // Get an index and execute one get command to plane.
+        private void StandardGetCommand(int i)
+        {
+            byte[] bytes = new byte[1024];
+            double answer;
+
+            // Send the data through the socket.  
+            this.sender.Send(messagesBytes[i]);
+
+            // Receive the response from the server.
+            int bytesRec = sender.Receive(bytes);
+
+            string message = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+
+            // Execute compatible lambda function.
+            try
+            {
+                answer = Convert.ToDouble(message);
+                lambdas[i](answer);
+            }
+            catch (FormatException e)
+            {
+                if (this.errorAction != null) { this.errorAction("problem in message " + i.ToString()); }
+            }
         }
 
         /*
