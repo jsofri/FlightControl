@@ -8,18 +8,21 @@ namespace PlaneController.Model
 {
     class TelnetClient
     {
-        private Boolean keepRunning;
-        private byte[][] messagesBytes;
-        private Action<double>[] lambdas;
-        private Action<string> errorAction;
+
+        // data members are volatile since using multi-threading in class.
+        private volatile Boolean _keepRunning;
+        private volatile byte[][] _messagesBytes;
+        private volatile Action<double>[] _lambdas;
+        private volatile Action<string> _errorAction;
+        private volatile object _errorActionLocker;
 
         //IPEndPoint endPoint;
-        Socket sender;
+        private volatile Socket _sender;
 
 
         public TelnetClient()
         {
-            keepRunning = false;
+            _keepRunning = false;
         }
 
         /*
@@ -32,34 +35,34 @@ namespace PlaneController.Model
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, Convert.ToInt32(port));
 
             // Create a TCP/IP  socket.
-            this.sender = new Socket(ipAddress.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
+            _sender = new Socket(ipAddress.AddressFamily,
+                                 SocketType.Stream, ProtocolType.Tcp);
 
             // Connect the socket to the remote endpoint.
-            sender.Connect(remoteEP);
+            _sender.Connect(remoteEP);
 
-            this.keepRunning = true;
+            _keepRunning = true;
         }
 
         /*
          * Loop that send set and get commands to plane.
-         * Use messageQueue to get set commands.
-         * Get messages are a defined routine given in messageByte array.
+         * Use messageQueue to get the 'set' commands.
+         * Get messages are a defined routine given in messageByte matrix.
          */
         public void Run()
         {
             Thread t;
             byte[] bytes = new byte[1024];
             MessageQueue queue = MessageQueue.GetInstance();
-            int i, len = lambdas.Length;
+            int i, len = _lambdas.Length;
             string message;
 
-            while (this.keepRunning)
+            while (_keepRunning)
             {
                 for (i = 0; i < len; i++)
                 {
                     t = new Thread(() => StandardGetCommand(i));
-                    wait10Sec(t);
+                    Wait10Sec(t);
                 }
 
                 while (i-- > 0)
@@ -74,40 +77,41 @@ namespace PlaneController.Model
                     if (message != null)
                     {
                         t = new Thread(() => StandardSetCommand(message));
-                        wait10Sec(t);
+                        Wait10Sec(t);
                     }
                 }
 
             }
 
             // Release the socket.  
-            sender.Shutdown(SocketShutdown.Both);
-            sender.Close();
-        }// End of run.
+            _sender.Shutdown(SocketShutdown.Both);
+            _sender.Close();
+        }// End of run().
 
         // Disconnect client from server.
         public void Stop()
         {
-            this.keepRunning = false;
+            _keepRunning = false;
         }
 
+        // Setter for errorAction.
         public void SetDefaultErrorAction(Action<string> action)
         {
-            this.errorAction = action;
+            _errorAction = action;
         }
 
         /*
          * Execute a thread, if it takes more than 10 sec,
-         * An event of errorAction is called.
+         * ErrorAction is called.
          */
-        private void wait10Sec(Thread t)
+        private void Wait10Sec(Thread t)
         {
             t.Start();
 
             if (!t.Join(TimeSpan.FromSeconds(10)))
             {
                 t.Abort();
-                this.errorAction("More then 10 seconds");
+                NotifyErrorHappened("10 seconds");
             }
         }
 
@@ -116,12 +120,23 @@ namespace PlaneController.Model
         {
             byte[] bytes = new byte[1024];
 
-            // Convert to bytes and send to server.
-            byte[] command = Encoding.ASCII.GetBytes(message);
-            this.sender.Send(command);
+            try
+            {
+                // Convert to bytes and send to server.
+                byte[] command = Encoding.ASCII.GetBytes(message);
+                _sender.Send(command);
 
-            // To empty buffer.
-            int bytesRec = sender.Receive(bytes);
+                // To empty buffer.
+                int bytesRec = _sender.Receive(bytes);
+            }
+            catch (ObjectDisposedException)
+            {
+                NotifyErrorHappened("Socket closed");
+            }
+            catch (Exception)
+            {
+                NotifyErrorHappened("ERR");
+            }
         }
 
         // Get an index and execute one get command to plane.
@@ -130,23 +145,33 @@ namespace PlaneController.Model
             byte[] bytes = new byte[1024];
             double answer;
 
-            // Send the data through the socket.  
-            this.sender.Send(messagesBytes[i]);
-
-            // Receive the response from the server.
-            int bytesRec = sender.Receive(bytes);
-
-            string message = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-
-            // Execute compatible lambda function.
             try
             {
+                // Send the data through the socket.  
+                _sender.Send(_messagesBytes[i]);
+
+                // Receive the response from the server.
+                int bytesRec = _sender.Receive(bytes);
+
+                // Convert bytes to ASCII string.
+                string message = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+
+                // Execute compatible lambda function.
                 answer = Convert.ToDouble(message);
-                lambdas[i](answer);
+                _lambdas[i](answer);
             }
-            catch (FormatException e)
+            // Problem in converting to double.
+            catch (FormatException)
             {
-                if (this.errorAction != null) { this.errorAction("problem in message " + i.ToString()); }
+                NotifyErrorHappened("NaN");
+            }
+            catch (ObjectDisposedException)
+            {
+                NotifyErrorHappened("Socket closed");
+            }
+            catch (Exception)
+            {
+                NotifyErrorHappened("ERR");
             }
         }
 
@@ -159,7 +184,7 @@ namespace PlaneController.Model
         {
             int len = messages.Length;
 
-            this.messagesBytes = new byte[len][];
+            _messagesBytes = new byte[len][];
 
             if (len != lambdas.Length) { RoutineErrorHelper(); }
 
@@ -167,21 +192,34 @@ namespace PlaneController.Model
             {
                 if (messages[i] != null && lambdas[i] != null)
                 {
-                    messagesBytes[i] = Encoding.ASCII.GetBytes(messages[i]);
+                    _messagesBytes[i] = Encoding.ASCII.GetBytes(messages[i]);
                 }
                 else
                 {
-                    this.RoutineErrorHelper();
+                    RoutineErrorHelper();
                 }
 
             }
 
-            this.lambdas = lambdas;
+            _lambdas = lambdas;
         }
 
+        // Helper to throw errors when initializing this object.
         private void RoutineErrorHelper()
         {
             throw new Exception("illegal string / lambda array");
+        }
+
+        // Invoke errorAction in a multi-Thread safe way.         
+        private void NotifyErrorHappened(string str)
+        {
+            lock (_errorActionLocker)
+            {
+                if (_errorAction != null)
+                {
+                    _errorAction(str);
+                }
+            }
         }
     }
 }
