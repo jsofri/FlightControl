@@ -129,10 +129,6 @@ namespace PlaneController.Model
                 // To empty buffer.
                 int bytesRec = _sender.Receive(bytes);
             }
-            catch (ObjectDisposedException)
-            {
-                NotifyErrorHappened("Socket closed");
-            }
             catch (Exception)
             {
                 NotifyErrorHappened("ERR");
@@ -164,10 +160,6 @@ namespace PlaneController.Model
             catch (FormatException)
             {
                 NotifyErrorHappened("NaN");
-            }
-            catch (ObjectDisposedException)
-            {
-                NotifyErrorHappened("Socket closed");
             }
             catch (Exception)
             {
