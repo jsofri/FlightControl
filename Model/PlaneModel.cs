@@ -5,6 +5,16 @@ using System.Threading;
 
 namespace PlaneController.Model
 {
+
+    /*
+     * Object that implements IPlaneModel as a model in MVVM.
+     * Use a Telnet client to control plane server.
+     * when operated, executes a loop of messages and matching lambda expression.
+     * Use MessageQueue to send set messages to Telnet client.
+     * 
+     * author: Jhonny.
+     * date: 3.28.20
+     */
     class PlaneModel : IPlaneModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -83,7 +93,6 @@ namespace PlaneController.Model
             }
         }
 
-
         // Maximum 228 km/h, 123 knots.
         public double PitoSpeed
         {
@@ -111,7 +120,6 @@ namespace PlaneController.Model
                 }
             }
         }
-
 
         public double Roll
         {
@@ -187,6 +195,7 @@ namespace PlaneController.Model
             _queue = MessageQueue.GetInstance();
         }
 
+        // Connect to telnet client in given params and run it in other thread.
         public void Connect(string ip, string port)
         {
             this.SetClient();
@@ -224,7 +233,7 @@ namespace PlaneController.Model
          */
         public void SetAileron(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/aileron ");
+            GenericSetMessage(value, -1, 1, "flight/aileron");
         }
 
         /*
@@ -233,7 +242,7 @@ namespace PlaneController.Model
          */
         public void SetElevator(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/elevator ");
+            GenericSetMessage(value, -1, 1, "flight/elevator");
         }
 
         /*
@@ -242,7 +251,7 @@ namespace PlaneController.Model
          */
         public void SetRudder(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/rudder ");
+            GenericSetMessage(value, -1, 1, "flight/rudder");
         }
 
         /*
@@ -251,7 +260,7 @@ namespace PlaneController.Model
          */
         public void SetThrottle(double value)
         {
-            GenericSetMessage(value, 0, 1, "engines/current-engine/throttle ");
+            GenericSetMessage(value, 0, 1, "engines/current-engine/throttle");
         }
 
         /*
@@ -265,7 +274,7 @@ namespace PlaneController.Model
 
             value = FixedValue(value, min, max);
 
-            message += (value.ToString() + '\n');
+            message += (value.ToString() + " \n");
 
             _queue.Enqueue(message);
         }
