@@ -1,8 +1,15 @@
-﻿using PlaneController.Model;
+using PlaneController.Model;
 using System.ComponentModel;
 
 namespace PlaneController.ViewModel
 {
+    /*
+     * Class that serve as a ViewModel layer to transfer data in MVVM.
+     * Properties includes getters only, originating from model properties.
+     * 
+     * author: Jhonny.
+     * date: 03.28.20
+     */
     class PlaneViewModel : INotifyPropertyChanged
     {
         private IPlaneModel _model;
@@ -19,6 +26,11 @@ namespace PlaneController.ViewModel
         public double VM_Latitude { get { return _model.Latitude; } }
         public double VM_Longitude { get { return _model.Longitude; } }
 
+
+        /*
+         * Ctor.
+         * Get model and set it a delegate to PropertyChangedEventArgs event.
+         */
         public PlaneViewModel(IPlaneModel model)
         {
             _model = model;
@@ -39,12 +51,45 @@ namespace PlaneController.ViewModel
             };
         }
 
+        // Notify View on changed properties.
         public void NotifyPropertyChanged(string message)
         {
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(message));
             }
+        }
+
+        // Might throw Exception.
+        void Connect(string ip, string port)
+        {
+            _model.Connect(ip, port);
+        }
+
+        // Might throw Exception.
+        void Disconnect()
+        {
+            _model.Disconnect();
+        }
+
+        void SetThrottle(double value)
+        {
+            _model.SetThrottle(value);
+        }
+
+        void SetAileron(double value)
+        {
+            _model.SetAileron(value);
+        }
+
+        void SetElevator(double value)
+        {
+            _model.SetElevator(value);
+        }
+
+        void SetRudder(double value)
+        {
+            _model.SetRudder(value);
         }
     }
 }
