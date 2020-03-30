@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\יהונתן\source\repos\PlaneController\PlaneController\obj\Debug\
+C:\Users\ronyu\Source\Repos\yehonatansofri\PlaneControl\PlaneController\PlaneController\obj\Debug\
 PlaneController
 none
 false
 DEBUG;TRACE
-C:\Users\יהונתן\source\repos\PlaneController\PlaneController\App.xaml
-32624229
+C:\Users\ronyu\Source\Repos\yehonatansofri\PlaneControl\PlaneController\PlaneController\App.xaml
+41193350279
 
-11-1635507096
-141066371409
-MainWindow.xaml;ControllerWindow.xaml;IvalidParametersWindow.xaml;
+131786126827
+15-616301776
+MainWindow.xaml;ControllerWindow.xaml;IvalidParametersWindow.xaml;Resources\Joystick.xaml;
 
 False
 
