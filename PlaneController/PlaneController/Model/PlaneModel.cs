@@ -48,12 +48,13 @@ namespace PlaneController.Model
             {
                 if (value != _headingDeg)
                 {
-                    _headingDeg = FixedValue(value, 0, 359.9999999);
+                    _headingDeg = value % 360;
                     NotifyPropertyChanged("HeadingDeg");
                 }
             }
         }
 
+        // [-5000, 721].
         public double GPSVerticalSpeed
         {
             get { return _gpsVerticalSpeed; }
@@ -104,7 +105,7 @@ namespace PlaneController.Model
             {
                 if (value != _pitoSpeed)
                 {
-                    _pitoSpeed = FixedValue(value, 0, 228);
+                    _pitoSpeed = (float)FixedValue(value, 0, 228);
                     NotifyPropertyChanged("PitoSpeed");
                 }
             }
@@ -131,7 +132,7 @@ namespace PlaneController.Model
             {
                 if (value != _roll)
                 {
-                    _roll = FixedValue(value, 0, 359.999999);
+                    _roll = (float)value % 360;
                     NotifyPropertyChanged("Roll");
                 }
             }
@@ -144,7 +145,7 @@ namespace PlaneController.Model
             {
                 if (value != _pitch)
                 {
-                    _pitch = FixedValue(value, 0, 359.999999);
+                    _pitch = value % 360;
                     NotifyPropertyChanged("Pitch");
                 }
             }
@@ -205,14 +206,6 @@ namespace PlaneController.Model
         {
             _queue = MessageQueue.GetInstance();
             _errors = new List<string>();
-
-            ////////////////////////////////
-            _errors.Add("Hi");
-            _errors.Add("Shalom");
-            _errors.Add("Kisse");
-            _errors.Add("Leyad");
-            _errors.Add("Halon");
-            ///////////////////////////////
         }
 
         // Connect to telnet client in given params and run it in other thread.
@@ -342,6 +335,7 @@ namespace PlaneController.Model
             {
                 case ("NaN"):
                 case ("ERR"):
+                case ("CNC"):
                 case ("10 seconds"):
                 case ("Socket close"):
                 case ("NIE"):
@@ -361,60 +355,69 @@ namespace PlaneController.Model
          */
         private void HandleError(string error)
         {
-            string success, unsuccess, message;
+            string success, unsuccess, message, time;
 
             // Postfix of current Hour
-            message = DateTime.Now.ToString("T", CultureInfo.CreateSpecificCulture("de-DE"));
-            
+            time = " at " + DateTime.Now.ToString("T", CultureInfo.CreateSpecificCulture("de-DE"));
+
             if (error == "NaN")
             {
                 DeleteErrorWithPrefix("Got");
 
-                message = "Got a NaN from server " + message;
-                _errors.Add(message);
+                message = "Got a NaN from server";
             }
-            else if (error == "ERR")
+            else if (error == "CNC")
             {
-                success = "Connection to server Error - reconnection succeeded! ";
-                unsuccess = "Connection to server Error - unable to reconnect ";
+                success = "Connection to server Error - reconnection succeeded";
+                unsuccess = "Connection to server Error - unable to reconnect";
 
                 DeleteErrorWithPrefix("Connection");
 
-                message = TryReconnection(success, unsuccess) + message;
-                _errors.Add(message);
+                message = TryReconnection(success, unsuccess);
             }
             else if (error == "10 seconds")
             {
-                success = "TimeOut - Reconnected to server successfully ";
-                unsuccess = "TimeOut - unable to reconnect to server ";
+                success = "TimeOut - Reconnected to server successfully";
+                unsuccess = "TimeOut - unable to reconnect to server";
 
                 DeleteErrorWithPrefix("TimeOut");
 
-                message = TryReconnection(success, unsuccess) + message;
+                message = TryReconnection(success, unsuccess);
             }
             else if (error == "NIE")
             {
                 DeleteErrorWithPrefix("Invalid");
-                
-                message = "Invalid Plane position " + message;
+
+                message = "Invalid Plane position";
+            }
+            else if (error == "ERR")
+            {
+                DeleteErrorWithPrefix("Server");
+
+                message = "Server returned ERR";
             }
             else
             {
                 DeleteErrorWithPrefix("Unknown");
 
-                message = "Unknown error happaned" + message;
+                message = "Unknown error happaned";
             }
 
-            _errors.Add(message);
+            _errors.Add(message + time);
         }
 
         private void DeleteErrorWithPrefix(string prefix)
         {
-            foreach (string e in _errors)
+            if (_errors.Count > 0)
             {
-                if (e.StartsWith(prefix))
+                var list = new List<string>(_errors);
+
+                foreach (string e in list)
                 {
-                    _errors.Remove(e);
+                    if (e.StartsWith(prefix))
+                    {
+                        _errors.Remove(e);
+                    }
                 }
             }
         }

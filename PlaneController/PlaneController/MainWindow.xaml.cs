@@ -8,6 +8,9 @@ namespace PlaneController
     /*
      * Class for main window - window that asks from user ip & port.
      * There are default values so user can just click start to run app.
+     * 
+     * author: Jhonny.
+     * date: 4.1.20
      */
     public partial class MainWindow : Window
     {
@@ -32,8 +35,10 @@ namespace PlaneController
             ResetData();
         }
 
-        // Reset ip and port to default values from application configurtion.
-        // Use helper functions.
+        /*
+         * Reset ip and port to default values from application configurtion.
+         * Use helper functions.
+         */
         public void ResetData()
         {
             this.ResetIP();
@@ -43,14 +48,14 @@ namespace PlaneController
         // Reset ip to default value and update appropriate text box in window.
         private void ResetIP()
         {
-            this.ip = System.Configuration.ConfigurationManager.AppSettings["ip"];
+            IP = System.Configuration.ConfigurationManager.AppSettings["ip"];
             IP_TB.Text = IP;
         }
 
         // Reset to default port and update appropriate text box in window.
         private void ResetPort()
         {
-            this.port = System.Configuration.ConfigurationManager.AppSettings["port"];
+            Port = System.Configuration.ConfigurationManager.AppSettings["port"];
             Port_TB.Text = Port;
         }
 
@@ -60,15 +65,17 @@ namespace PlaneController
             ResetData();
         }
 
-        // Event handler for clicking on start button.
-        // If ip and port are good - run a controller window.
+        /*
+         * Event handler for clicking on start button.
+         * If ip and port are good - run a controller window.
+         */
         private void Start_Button_Click(object sender, RoutedEventArgs e)
         {
             if (ValidInput())
             {
                 PlaneModel model = new PlaneModel();
 
-                //if (Connect(model))
+                if (Connect(model))
                 {
                     ControllerWindow controllerWindow =
                     new ControllerWindow(new PlaneViewModel(model));
@@ -94,12 +101,12 @@ namespace PlaneController
         private bool ValidInput()
         {
             bool boolean = true;
-            if (this.port.Length != 4) return false;
+            if (Port.Length != 4) return false;
             try
             {
                 if (!IsLocalHost())
                 {
-                    System.Net.IPAddress.Parse(ip);
+                    System.Net.IPAddress.Parse(IP);
                 }
 
                 if (!System.Text.RegularExpressions.Regex.IsMatch(port, @"^\d+$"))
@@ -119,7 +126,7 @@ namespace PlaneController
         // Check if ip member equals to some variation of 'local host'.
         private bool IsLocalHost()
         {
-            if (this.ip == "localhost" || this.ip == "local host" || this.ip == "local_host")
+            if (IP == "localhost" || IP == "local host" || IP == "local_host")
             {
                 ResetIP();
                 return true;
@@ -134,7 +141,7 @@ namespace PlaneController
 
             try
             {
-                model.Connect(this.ip, this.port);
+                model.Connect(IP, Port);
                 return true;
             }
             catch (Exception)

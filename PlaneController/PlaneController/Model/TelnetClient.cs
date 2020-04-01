@@ -94,7 +94,7 @@ namespace PlaneController.Model
 
             }
 
-            // Release the socket.  
+            // Release socket.  
             _sender.Shutdown(SocketShutdown.Both);
             _sender.Close();
         }// End of run().
@@ -142,7 +142,7 @@ namespace PlaneController.Model
             }
             catch (Exception)
             {
-                NotifyErrorHappened("ERR");
+                NotifyErrorHappened("CNC");
             }
         }
 

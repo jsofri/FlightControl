@@ -5,6 +5,14 @@ using System.Windows.Media;
 
 namespace PlaneController
 {
+
+    /*
+     * Class is a control window in a plane simulator.
+     * Function as a View class in MVVM architecture.
+     * 
+     * author: Jhonny.
+     * date: 4.1.20
+     */
     public partial class ControllerWindow : Window
     {
         private PlaneViewModel _vm;
@@ -13,6 +21,7 @@ namespace PlaneController
 
         private double _aileron;
 
+        // Ctor - gets a ViewModel object as a parameter.
         public ControllerWindow(PlaneViewModel vm)
         {
             InitializeComponent();
@@ -26,12 +35,16 @@ namespace PlaneController
                        // Error occured
                        if (e.PropertyName == "VM_Errors")
                        {
-                           ErrorsComboBox.ItemsSource = vm.VM_Errors;
-                           if (vm.VM_Errors.Count > 0)
+                           this.Dispatcher.Invoke(() =>
                            {
-                               ErrorsLabel.Foreground = Brushes.Red;
-                               ErrorsComboBox.SelectedIndex = 0;
-                           }
+                               ErrorsComboBox.ItemsSource = vm.VM_Errors;
+                               if (vm.VM_Errors.Count > 0)
+                               {
+                                   ErrorsLabel.Foreground = Brushes.Red;
+                                   ErrorsComboBox.SelectedIndex = 0;
+                               }
+                           });
+
                        }
                    };
         }
@@ -49,6 +62,10 @@ namespace PlaneController
             ErrorsLabel.Foreground = new SolidColorBrush(color);
         }
 
+        /*
+         * Event handler for aileron slider object. gets called a lot.
+         * As a result, call to VM only if the difference from value is at least 0.05
+         */
         private void AileronSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             double diff = AileronSlider.Value - _aileron;
@@ -61,6 +78,10 @@ namespace PlaneController
             }
         }
 
+        /*
+         * Event handler for throttle slider object. gets called a lot.
+         * As a result, call to VM only if the difference from value is at least 0.05
+         */
         private void ThrottleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             double diff = ThrottleSlider.Value - _throttle;

@@ -3,7 +3,12 @@ using System.Collections.Generic;
 namespace PlaneController.Model
 {
 
-    // A singleton class that stores a queue of strings with a multi-thread control.
+    /*
+     * A singleton class that stores a queue of strings with a multi-thread control.
+     * 
+     * author: Jhonny.
+     * date: 3.28.20
+     */
     class MessageQueue
     {
         private Queue<string> queue;

@@ -8,7 +8,7 @@
         Height="150" Width="250"
         Style="{StaticResource WindowStyle}">
     <Grid>
-        <Label x:Name="Message" Style="{StaticResource LabelTitleStyle}" Content="Default message" HorizontalAlignment="Left" Margin="0,-18,0,70.8" Width="243" 
+        <Label x:Name="Message" Style="{StaticResource LabelTitleStyle}" Content="Default message" HorizontalAlignment="Left" Margin="0,-2,0,54.8" Width="243" 
                VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="68" >
         </Label>
         <Button Style="{StaticResource ButtonStyle}" Content="OK" FontSize="15" Margin="85,0,83.2,9.8"
