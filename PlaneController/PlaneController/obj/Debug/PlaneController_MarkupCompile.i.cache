@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\יהונתן\source\repos\PlaneController\PlaneController\App.xaml
-32624229
+4-868482860
 
-12893367257
+141002935841
 141066371409
-MainWindow.xaml;ControllerWindow.xaml;IvalidParametersWindow.xaml;
+MainWindow.xaml;ControllerWindow.xaml;ErrorWindow.xaml;Resources\Joystick.xaml;
 
 False
 

@@ -59,9 +59,13 @@
     <Compile Include="ControllerWindow.xaml.cs">
       <DependentUpon>ControllerWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IvalidParametersWindow.xaml.cs">
-      <DependentUpon>IvalidParametersWindow.xaml</DependentUpon>
+    <Compile Include="ErrorWindow.xaml.cs">
+      <DependentUpon>ErrorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Joystick.xaml.cs">
+      <DependentUpon>Joystick.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\PlaneViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -78,7 +82,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="IvalidParametersWindow.xaml">
+    <Page Include="ErrorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Joystick.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -117,5 +125,6 @@
     <Resource Include="Resources\location.png" />
     <Resource Include="Resources\plane.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

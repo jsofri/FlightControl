@@ -1,9 +1,14 @@
-﻿using System.Windows;
+﻿using PlaneController.Model;
+using PlaneController.ViewModel;
+using System;
+using System.Windows;
 
 namespace PlaneController
 {
-    // Class for main window - window that asks from user ip & port.
-    // There are default values so user can just click start to run app.
+    /*
+     * Class for main window - window that asks from user ip & port.
+     * There are default values so user can just click start to run app.
+     */
     public partial class MainWindow : Window
     {
         private string ip;
@@ -59,29 +64,34 @@ namespace PlaneController
         // If ip and port are good - run a controller window.
         private void Start_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (validInput())
+            if (ValidInput())
             {
-                ControllerWindow controllerWindow =
-                    new ControllerWindow(this.ip, this.port);
+                PlaneModel model = new PlaneModel();
 
-                this.Close();
-                controllerWindow.Show();
+                //if (Connect(model))
+                {
+                    ControllerWindow controllerWindow =
+                    new ControllerWindow(new PlaneViewModel(model));
+
+                    this.Close();
+                    controllerWindow.Show();
+                }
             }
             else
             {
-                OpenErrorWindow();
+                OpenErrorWindow("Invalid IP/ Port");
             }
         }
 
         // Open a window of error in ip or port number.
-        private void OpenErrorWindow()
+        private void OpenErrorWindow(string errorMessage)
         {
-            IvalidParametersWindow errorWindow = new IvalidParametersWindow();
+            ErrorWindow errorWindow = new ErrorWindow(errorMessage);
             errorWindow.Show();
         }
 
         // Check if IP and Port are valid.
-        private bool validInput()
+        private bool ValidInput()
         {
             bool boolean = true;
             if (this.port.Length != 4) return false;
@@ -106,6 +116,7 @@ namespace PlaneController
             return boolean;
         }
 
+        // Check if ip member equals to some variation of 'local host'.
         private bool IsLocalHost()
         {
             if (this.ip == "localhost" || this.ip == "local host" || this.ip == "local_host")
@@ -114,6 +125,23 @@ namespace PlaneController
                 return true;
             }
 
+            return false;
+        }
+
+        // Tries to connect to the client. returns true if successed.
+        private bool Connect(IPlaneModel model)
+        {
+
+            try
+            {
+                model.Connect(this.ip, this.port);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            OpenErrorWindow("Unable to connect");
             return false;
         }
     }

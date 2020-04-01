@@ -19,7 +19,7 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Label x:Name="Title" Grid.ColumnSpan="3" TextBlock.FontSize="20" Content="Warming engines! set Port/ IP" Foreground="#FFE5D5D5"></Label>
+        <Label x:Name="WindowTitle" Grid.ColumnSpan="3" TextBlock.FontSize="20" Content="Warming engines! set Port/ IP" Foreground="#FFE5D5D5"></Label>
         <Label x:Name="IPLabel" Content="IP" HorizontalAlignment="Left" Foreground="#FFE5D5D5" Margin="50,39,0,0" VerticalAlignment="Top" Grid.RowSpan="2"/>
         <TextBox x:Name="IP_TB" Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="23" Margin="74,43,0,0" TextWrapping="Wrap" VerticalAlignment="Top"
                  Width="199" Grid.RowSpan="2"

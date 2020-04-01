@@ -1,17 +1,32 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Threading;
 
 namespace PlaneController.Model
 {
+
+    /*
+     * Object that implements IPlaneModel as a model in MVVM.
+     * Use a Telnet client to control plane server.
+     * when operated, executes a loop of messages and matching lambda expression.
+     * Use MessageQueue to send set messages to Telnet client.
+     * 
+     * author: Jhonny.
+     * date: 3.28.20
+     */
     class PlaneModel : IPlaneModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private volatile MessageQueue _queue;
-        private TelnetClient client;
+        private TelnetClient _client;
+        private string _ip = null;
+        private string _port = null;
 
         // Thread of run loop.
-        Thread t;
+        Thread _threadOfLoop;
 
         private double _headingDeg;
         private double _gpsVerticalSpeed;
@@ -23,6 +38,7 @@ namespace PlaneController.Model
         private double _pitch;
         private double _latitude;
         private double _longitude;
+        private List<string> _errors;
 
 
         public double HeadingDeg
@@ -80,7 +96,6 @@ namespace PlaneController.Model
             }
         }
 
-
         // Maximum 228 km/h, 123 knots.
         public double PitoSpeed
         {
@@ -108,7 +123,6 @@ namespace PlaneController.Model
                 }
             }
         }
-
 
         public double Roll
         {
@@ -178,68 +192,101 @@ namespace PlaneController.Model
             }
         }
 
+        public List<string> Errors
+        {
+            get
+            {
+                return _errors;
+            }
+        }
+
 
         public PlaneModel()
         {
-            this.client = new TelnetClient();
             _queue = MessageQueue.GetInstance();
+            _errors = new List<string>();
+
+            ////////////////////////////////
+            _errors.Add("Hi");
+            _errors.Add("Shalom");
+            _errors.Add("Kisse");
+            _errors.Add("Leyad");
+            _errors.Add("Halon");
+            ///////////////////////////////
         }
 
+        // Connect to telnet client in given params and run it in other thread.
         public void Connect(string ip, string port)
         {
-            this.SetClientRoutine();
+            this.SetClient();
+
+            if (_port == null || _ip == null)
+            {
+                _ip = ip;
+                _port = port;
+            }
+
             try
             {
-                this.client.Connect(ip, port);
-                t = new Thread(new ThreadStart(this.client.Run));
-                t.Start();
+                _client.Connect(ip, port);
+                _threadOfLoop = new Thread(new ThreadStart(_client.Run));
+                _threadOfLoop.Start();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                if (t.IsAlive)
-                    client.Stop();
-                t.Abort();
+                if (_threadOfLoop != null && _threadOfLoop.IsAlive)
+                    Disconnect();
                 throw new Exception("error in connecting to server");
             }
-
         }
 
+        // Disconnect from Telnet client.
         public void Disconnect()
         {
-            this.client.Stop();
-            t.Join();
+            _client.Stop();
+            _threadOfLoop.Join();
         }
 
-        // Set value of aileron using helper function.
-        // Range of Aileron is [-1, 1].
+        /*
+         * Set value of aileron using helper function.
+         * Range of Aileron is [-1, 1].
+         */
         public void SetAileron(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/aileron ");
+            GenericSetMessage(value, -1, 1, "flight/aileron");
         }
 
-        // Set value of Elevator using helper function.
-        // Range of elevator is [-1, 1].
+        /*
+         * Set value of Elevator using helper function.
+         * Range of elevator is [-1, 1].
+         */
         public void SetElevator(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/elevator ");
+            GenericSetMessage(value, -1, 1, "flight/elevator");
         }
 
-        // Set value of Rudder using helper function.
-        // Range of rudder is [-1, 1].
+        /*
+         * Set value of Rudder using helper function.
+         * Range of rudder is [-1, 1].
+         */
         public void SetRudder(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/rudder ");
+            GenericSetMessage(value, -1, 1, "flight/rudder");
         }
 
-        // Set value of throttle using helper function.
-        // Range of throttle is [ 0 , 1 ].
+        /*
+         * Set value of throttle using helper function.
+         * Range of throttle is [ 0 , 1 ].
+         */
         public void SetThrottle(double value)
         {
-            GenericSetMessage(value, 0, 1, "engines/current-engine/throttle ");
+            GenericSetMessage(value, 0, 1, "engines/current-engine/throttle");
         }
 
-        // Helper function for setting a value of a component in plane.
-        // Check that value is in range and make an appropriate set command.
+        /*
+         * Helper function for setting a value of a component in plane.
+         * Check that value is in range and make an appropriate set command.
+         */
         private void GenericSetMessage(double value, double min, double max,
                                       string suffix)
         {
@@ -247,11 +294,16 @@ namespace PlaneController.Model
 
             value = FixedValue(value, min, max);
 
-            message += (value.ToString() + '\n');
+            message += (value.ToString() + " \n");
 
             _queue.Enqueue(message);
         }
 
+        /*
+         * Helper function to make sure the input "value" is in range.
+         * If value is out of range [min, max], set it to be in the closer edge.
+         * Return the closer value in the range.
+         */
         private double FixedValue(double value, double min, double max)
         {
             if (value > max || value < min)
@@ -263,50 +315,161 @@ namespace PlaneController.Model
         }
 
         // Call PropertyChanged event with appropriate string of property.
-        private void NotifyPropertyChanged(string property)
+        private void NotifyPropertyChanged(string message)
         {
-            if (PropertyChanged != null)
+            if (PropertyChanged != null && message.Length > 0)
             {
+                if (!IsNotErrorMessage(message))
+                {
+                    // Write specific error to error list and handle it.
+                    HandleError(message);
+                    message = "Errors";
+                }
 
-                this.PropertyChanged(this, new PropertyChangedEventArgs(property));
-
-                /*
-                this code needs to be somewhere
-                
-                if (property == "NaN")
-                {
-                    // server sent not a number
-                }
-                else if (property == "ERR")
-                {
-                    // some error in connection with server
-                }
-                else if (property == "10 seconds")
-                {
-                    // more than 10 seconds for an operation with server
-                }
-                else if (property == "Socket closed")
-                {
-                    // problem from OS - need to reconnect
-                }
-                else if (property == "NIE")
-                {
-                    // server sent not in earth coordination
-                }
-                else
-                {
-                    this.PropertyChanged(this, new PropertyChangedEventArgs(property));
-                }
-                */
+                this.PropertyChanged(this, new PropertyChangedEventArgs(message));
             }
         }
 
-        // Set components of the client - arrays of lambdas and commands.
-        // Also set default error lambda function.
-        private void SetClientRoutine()
+        /*
+         * Get a string and check that it's not an error string.
+         * Error strings are a convention between telnet client & this object.
+         */
+        private bool IsNotErrorMessage(string str)
         {
-            string[] messages = new string[8];
-            Action<double>[] lambdas = new Action<double>[8];
+            bool boolean = true;
+
+            switch (str)
+            {
+                case ("NaN"):
+                case ("ERR"):
+                case ("10 seconds"):
+                case ("Socket close"):
+                case ("NIE"):
+                    boolean = false;
+                    break;
+                default:
+                    break;
+            }
+
+            return boolean;
+        }
+
+        /*
+         * Method to handle errors in client/ server.
+         * Operate accordingly to the problem.
+         * Input string is a short description of the problem's type.
+         */
+        private void HandleError(string error)
+        {
+            string success, unsuccess, message;
+
+            // Postfix of current Hour
+            message = DateTime.Now.ToString("T", CultureInfo.CreateSpecificCulture("de-DE"));
+            
+            if (error == "NaN")
+            {
+                DeleteErrorWithPrefix("Got");
+
+                message = "Got a NaN from server " + message;
+                _errors.Add(message);
+            }
+            else if (error == "ERR")
+            {
+                success = "Connection to server Error - reconnection succeeded! ";
+                unsuccess = "Connection to server Error - unable to reconnect ";
+
+                DeleteErrorWithPrefix("Connection");
+
+                message = TryReconnection(success, unsuccess) + message;
+                _errors.Add(message);
+            }
+            else if (error == "10 seconds")
+            {
+                success = "TimeOut - Reconnected to server successfully ";
+                unsuccess = "TimeOut - unable to reconnect to server ";
+
+                DeleteErrorWithPrefix("TimeOut");
+
+                message = TryReconnection(success, unsuccess) + message;
+            }
+            else if (error == "NIE")
+            {
+                DeleteErrorWithPrefix("Invalid");
+                
+                message = "Invalid Plane position " + message;
+            }
+            else
+            {
+                DeleteErrorWithPrefix("Unknown");
+
+                message = "Unknown error happaned" + message;
+            }
+
+            _errors.Add(message);
+        }
+
+        private void DeleteErrorWithPrefix(string prefix)
+        {
+            foreach (string e in _errors)
+            {
+                if (e.StartsWith(prefix))
+                {
+                    _errors.Remove(e);
+                }
+            }
+        }
+
+        /*
+         * A helper method to try reconnection and returning mathing message.
+         * Input strings are messages to return after trying to reconnect.
+         */
+        private string TryReconnection(string success, string unsuccess)
+        {
+            if (!Reconnect())
+            {
+                return unsuccess;
+            }
+            return success;
+        }
+
+        /*
+         * Disconnect this object from current Telnet client.
+         * Tries to reconnect for 5 seconds.
+         * Return bool of success in reconnection.
+         */
+        private bool Reconnect()
+        {
+            bool status = false;
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+
+            Disconnect();
+
+            while (sw.ElapsedMilliseconds < 5000)
+            {
+                try
+                {
+                    Connect(_ip, _port);
+                    status = true;
+                }
+                catch (Exception) { }
+            }
+
+            return status;
+        }
+
+        /*
+         * Set components of the client - arrays of lambdas and commands.
+         * Also set default error lambda function.
+         */
+        private void SetClient()
+        {
+            string[] messages = new string[10];
+            Action<double>[] lambdas = new Action<double>[10];
+
+            _client = new TelnetClient();
+
             messages[0] = "get /instrumentation/heading-indicator/indicated-heading-deg\n";
             lambdas[0] = (double value) => HeadingDeg = value;
 
@@ -337,8 +500,8 @@ namespace PlaneController.Model
             messages[9] = "get /position/longitude-deg\n";
             lambdas[9] = (double value) => Longitude = value;
 
-            this.client.SetRoutine(messages, lambdas);
-            this.client.SetDefaultErrorAction(NotifyPropertyChanged);
+            _client.SetRoutine(messages, lambdas);
+            _client.SetDefaultErrorAction(NotifyPropertyChanged);
         }
     }
 }

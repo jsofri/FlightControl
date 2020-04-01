@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -6,6 +6,16 @@ using System.Threading;
 
 namespace PlaneController.Model
 {
+
+    /*
+     * Send and recieve messages on a telnet protocol to a specific end point.
+     * Use a known set of messages and execute lambda after each message.
+     * Use a MessageQueue object to send "set" messages to end point.
+     * Make sure a send won't take more than 10 seconds to execute.
+     * 
+     * author: Jhonny.
+     * data: 3.28.20
+     */
     class TelnetClient
     {
 
@@ -23,6 +33,7 @@ namespace PlaneController.Model
         public TelnetClient()
         {
             _keepRunning = false;
+            _errorActionLocker = new object();
         }
 
         /*
@@ -129,10 +140,6 @@ namespace PlaneController.Model
                 // To empty buffer.
                 int bytesRec = _sender.Receive(bytes);
             }
-            catch (ObjectDisposedException)
-            {
-                NotifyErrorHappened("Socket closed");
-            }
             catch (Exception)
             {
                 NotifyErrorHappened("ERR");
@@ -164,10 +171,6 @@ namespace PlaneController.Model
             catch (FormatException)
             {
                 NotifyErrorHappened("NaN");
-            }
-            catch (ObjectDisposedException)
-            {
-                NotifyErrorHappened("Socket closed");
             }
             catch (Exception)
             {
