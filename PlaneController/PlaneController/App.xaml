@@ -33,14 +33,6 @@
             <Setter Property="Background" Value="black"/>
             <Setter Property="Foreground" Value="#FF3F8BFA"/>
         </Style>
-        
-            <!-- &&&
-        
-        from ButtonStyle <Setter Property="BorderBrush" Value="#FF639CEE"/>
-        
-        from TextBoxStyle<Setter Property="BorderBrush" Value="Black"/>
-        &&& -->
-
 
     </Application.Resources>
 </Application>
