@@ -34,6 +34,19 @@ namespace PlaneController.ViewModel
                 return String.Join(", ", coords);
             }
         }
+        public double VM_Rudder {
+           set
+           {
+              _model.SetRudder(value);
+           }
+        }
+        public double VM_Elevator
+        {
+           set
+           {
+              _model.SetElevator(value);
+           }
+        }
 
         /*
          * Ctor.
