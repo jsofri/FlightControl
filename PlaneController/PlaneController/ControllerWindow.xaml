@@ -7,10 +7,10 @@
         xmlns:local="clr-namespace:PlaneController"
         xmlns:res="clr-namespace:PlaneController.Resources"
         mc:Ignorable="d"
+        x:Name="ControllerWindowName"
         Title="PlaneController" Height="450" Width="800"
         WindowStartupLocation="CenterScreen"
         Icon="Resources/plane.ico"
-        WindowState="Maximized"
         Background="AliceBlue">
 
     <Grid>
@@ -25,22 +25,24 @@
             <ColumnDefinition Width="20*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ****************** dont forget to import map DLL ********************** -->
+        <!-- Map -->
         <map:Map x:Name="myMap" ZoomLevel="15" CredentialsProvider="AkLl-qrKNAoD1QHY1-6q0qgDBI-Qymjx_XSmdOdpK7yQdGi2AlMeALgAvfP4gUq5" Mode="Aerial" Center="{Binding VM_Coords}"
-                 BorderThickness="20" BorderBrush="AliceBlue" Grid.RowSpan="3"></map:Map>
-        <map:Pushpin Location="{Binding VM_Coords}" Grid.RowSpan="3" Margin="0,0,0,37"/>
-        <!--<Canvas Width="50" Height="80"
-              map:MapLayer.Position="32.007479, 34.877753" 
-              map:MapLayer.PositionOrigin="BottomCenter" Opacity="0.7">
-            <Path Data="M 0,0 L 50,0 50,50 25,80 0,50 0,0" Fill="Red" Stroke="Wheat" StrokeThickness="2" />
-            <TextBlock FontSize="10" Foreground="White" Margin="5" TextAlignment="Center">
-                        Space <LineBreak />
-                        Needle <LineBreak />
-            </TextBlock>
-        </Canvas>-->
+                 BorderThickness="20" BorderBrush="AliceBlue" Grid.RowSpan="2"></map:Map>
+        <!--<map:Pushpin Location="{Binding VM_Coords}" Grid.RowSpan="2" Margin="0,0,0,37"/>-->
+
+        <!-- Joystick -->
         <Viewbox StretchDirection="Both" Stretch="Uniform" Width="150" Grid.Row="1" Grid.Column="2">
-            <res:Joystick x:Name="Joystick" Loaded="Joystick_Loaded"></res:Joystick>
+            <res:Joystick x:Name="Joystick" X_="{Binding VM_Rudder, Mode=OneWay}" Y_="{Binding VM_Elevator, Mode=OneWay}"></res:Joystick>
         </Viewbox>
+
+        <TextBlock DockPanel.Dock="Right" TextAlignment="Right" Width="400" RenderTransformOrigin="0.425,1.333">
+            <Run Text="Rudder (X) ="/>
+            <Run Text="{Binding Path=X_, ElementName=Joystick, Mode=OneWay}"/>
+            <Run Text=", Elevator (Y) ="/>
+            <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>
+        </TextBlock>
+    
+        <!-- Throttle -->
         <TextBlock Grid.Row="2" HorizontalAlignment="Center" Text="Throttle:" Grid.ColumnSpan="2" Margin="10,9.5,131,-9.5" Width="57" Grid.Column="1">
             <TextBlock.RenderTransform>
                 <RotateTransform Angle="0" />
@@ -50,6 +52,8 @@
             <!--<TextBox Text="{Binding ElementName=bottomSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Right" Width="40" RenderTransformOrigin="0.425,1.333" />-->
             <Slider Maximum="1" Minimum="-1" x:Name="BottomSlider" TickPlacement="BottomRight" TickFrequency="0.1" Orientation="Horizontal" Width="120" MouseLeftButtonUp="BottomSlider_MouseLeftButtonUp"/>
         </DockPanel >
+
+        <!-- Aileron -->
         <DockPanel VerticalAlignment="Center" Width="50" Height="150" Grid.Row="1" Grid.Column="1">
             <Slider Maximum="1" Minimum="-1" x:Name="LeftSlider" TickPlacement="BottomRight" TickFrequency="0.1" Orientation="Vertical" MouseLeftButtonUp="LeftSlider_MouseLeftButtonUp"/>
             <TextBlock VerticalAlignment="Center" Text="Aileron" Margin="-10,88,-10,30" Width="47">
