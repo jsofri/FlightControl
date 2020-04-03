@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace PlaneController.Model
-{ 
+{
     /*
      * Interface for a plane that serves as a model in MVVM architecture.
      * In order if implementors to work correctly,
@@ -10,7 +10,21 @@ namespace PlaneController.Model
     interface IPlaneModel : INotifyPropertyChanged
     {
 
-        // Connect to plane in the given ip and port.
+        double HeadingDeg { get; set; }
+        double GPSVerticalSpeed { get; set; }
+        double GPSGroundSpeed { get; set; }
+        double GPSAltitude { get; set; }
+        double PitoSpeed { get; set; }
+        double PitoAltitude { get; set; }
+        double Roll { get; set; }
+        double Pitch { get; set; }
+        double Latitude { get; set; }
+        double Longitude { get; set; }
+
+        /* 
+         * Connect to plane in the given ip and port.
+         * Throws exception if there's a problem.
+         */
         void Connect(string ip, string port);
 
         // Disconnect from plane.
@@ -18,10 +32,10 @@ namespace PlaneController.Model
 
         // Valid values are [0, 1].
         void SetThrottle(double value);
-        
+
         // Valid values are [-1, 1].
         void SetAileron(double value);
-        
+
         // Valid values are [-1, 1].
         void SetElevator(double value);
 
