@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 
@@ -435,7 +434,8 @@ namespace PlaneController.Model
         /*
          * A multi-thread safe contatiner for holding errors in a single one list.
          * 
-         * 
+         * author: Jhonny
+         * date: 7.4.20
          */
         static class ErrorsQueue
         {
