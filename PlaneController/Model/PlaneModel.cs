@@ -23,9 +23,10 @@ namespace PlaneController.Model
         private TelnetClient _client;
         private string _ip = null;
         private string _port = null;
+        private const double EPSILON = 0.00001;
 
-        // Thread of run loop.
-        Thread _threadOfLoop;
+      // Thread of run loop.
+      Thread _threadOfLoop;
 
         private double _headingDeg;
         private double _gpsVerticalSpeed;
@@ -158,12 +159,17 @@ namespace PlaneController.Model
                 if (value != _latitude)
                 {
                     _latitude = FixedValue(value, -90, 90);
-                    if (_latitude == value)
+
+                    // fix latitude if needed
+                    FixLatitude(value);
+
+                    if (Math.Abs(_latitude - value) <= 2)
                     {
                         NotifyPropertyChanged("Latitude");
                     }
                     else
                     {
+                        System.Console.WriteLine("***********************   " + value);
                         NotifyPropertyChanged("NIE");
                     }
                 }
@@ -179,15 +185,37 @@ namespace PlaneController.Model
                 if (value != _longitude)
                 {
                     _longitude = FixedValue(value, -180, 180);
-                    if (_longitude == value)
+
+                    // fix longitude if needed
+                    FixLongitude(value);
+
+                    if (Math.Abs(_longitude - value) <= 2)
                     {
                         NotifyPropertyChanged("Longitude");
                     }
                     else
                     {
+                        System.Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$   " + value);
                         NotifyPropertyChanged("NIE");
                     }
                 }
+            }
+        }
+        public void FixLatitude(double value)
+        {
+            // fix latitude
+            if (value > 90 || value < -90)
+            {
+                SetLatitude(-value);
+            }
+        }
+
+        public void FixLongitude(double value)
+        {
+            // fix latitude
+            if (value > 180 || value < -180)
+            {
+                SetLongitude(-value);
             }
         }
 
@@ -243,7 +271,7 @@ namespace PlaneController.Model
          */
         public void SetAileron(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/aileron");
+            GenericSetMessage(value, -1, 1, "controls/flight/aileron");
         }
 
         /*
@@ -252,7 +280,7 @@ namespace PlaneController.Model
          */
         public void SetElevator(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/elevator");
+            GenericSetMessage(value, -1, 1, "controls/flight/elevator");
         }
 
         /*
@@ -261,7 +289,7 @@ namespace PlaneController.Model
          */
         public void SetRudder(double value)
         {
-            GenericSetMessage(value, -1, 1, "flight/rudder");
+            GenericSetMessage(value, -1, 1, "controls/flight/rudder");
         }
 
         /*
@@ -270,24 +298,42 @@ namespace PlaneController.Model
          */
         public void SetThrottle(double value)
         {
-            GenericSetMessage(value, 0, 1, "engines/current-engine/throttle");
+            GenericSetMessage(value, 0, 1, "controls/engines/current-engine/throttle");
         }
 
         /*
-         * Helper function for setting a value of a component in plane.
-         * Check that value is in range and make an appropriate set command.
+         * Set value of Latitude using helper function.
+         * Range of Latitude is [-90, 90].
          */
-        private void GenericSetMessage(double value, double min, double max,
-                                      string suffix)
-        {
-            string message = "set /controls/" + suffix;
+         public void SetLatitude(double value)
+         {
+            GenericSetMessage(value, -90, 90, "position/latitude-deg");
+         }
 
-            value = FixedValue(value, min, max);
+         /*
+         * Set value of Longitude using helper function.
+         * Range of Longitude is [-180, 180].
+         */
+         public void SetLongitude(double value)
+         {
+            GenericSetMessage(value, -180, 180, "position/longitude-deg");
+         }
 
-            message += (value.ToString() + " \n");
+         /*
+          * Helper function for setting a value of a component in plane.
+          * Check that value is in range and make an appropriate set command.
+          */
+         private void GenericSetMessage(double value, double min, double max,
+                                         string suffix)
+           {
+               string message = "set /" + suffix + " ";
 
-            _queue.Enqueue(message);
-        }
+               value = FixedValue(value, min, max);
+
+               message += (value.ToString() + "\n");
+
+               _queue.Enqueue(message);
+           }
 
         /*
          * Helper function to make sure the input "value" is in range.
@@ -379,7 +425,7 @@ namespace PlaneController.Model
             }
             else
             {
-                message = "Unknown error happaned";
+                message = "Unknown error happened";
             }
 
             ErrorsQueue.Insert(message + time);

@@ -24,6 +24,8 @@ namespace PlaneController.Resources
    {
      
       private Point initPos;
+      private double _lastElevator;
+      private double _lastRudder;
       //public event PropertyChangedEventHandler PropertyChanged;
       public static readonly DependencyProperty X_Property = DependencyProperty.Register(nameof(X_), typeof(double), typeof(Joystick), new PropertyMetadata((double) 0));
       public static readonly DependencyProperty Y_Property = DependencyProperty.Register(nameof(Y_), typeof(double), typeof(Joystick), new PropertyMetadata((double) 0));
@@ -38,12 +40,10 @@ namespace PlaneController.Resources
       {
          get
          {
-            //return knobPosition.X;
             return (double)GetValue(X_Property);
          }
          set
          {
-            //knobPosition.X = value;
             SetValue(X_Property, value);
          }
       }
@@ -52,12 +52,10 @@ namespace PlaneController.Resources
       {
          get
          {
-            //return knobPosition.Y;
             return (double)GetValue(Y_Property);
          }
          set
          {
-            //knobPosition.Y = value;
             SetValue(Y_Property, value);
          }
       }
@@ -84,14 +82,14 @@ namespace PlaneController.Resources
             {
                knobPosition.X = e.GetPosition(this).X - initPos.X;
                knobPosition.Y = e.GetPosition(this).Y - initPos.Y;
-               Console.WriteLine(knobPosition.X + ",  " + knobPosition.Y);
-               X_ = knobPosition.X / maxRadius;
-               Y_ = - knobPosition.Y / maxRadius;
 
-               X_ = (X_ > 1) ? 1 : X_;
-               X_ = (X_ < -1) ? -1 : X_;
-               Y_ = (Y_ > 1) ? 1 : Y_;
-               Y_ = (Y_ < -1) ? -1 : Y_;
+               _lastRudder = knobPosition.X / maxRadius;
+               _lastElevator = - knobPosition.Y / maxRadius;
+
+               _lastRudder = (_lastRudder > 1) ? 1 : _lastRudder;
+               _lastRudder = (_lastRudder < -1) ? -1 : _lastRudder;
+               _lastElevator = (_lastElevator > 1) ? 1 : _lastElevator;
+               _lastElevator = (_lastElevator < -1) ? -1 : _lastElevator;
                //PropertyChanged(this, new PropertyChangedEventArgs("Y_"));
             }
 
@@ -100,18 +98,32 @@ namespace PlaneController.Resources
 
       private void Base_MouseUp(object sender, MouseButtonEventArgs e)
       {
+         // reset knob
          knobPosition.X = 0;
          knobPosition.Y = 0;
-         X_ = knobPosition.X;
-         Y_ = knobPosition.Y;
+
+         // update x and y
+         X_ = _lastRudder;
+         Y_ = _lastElevator;
+
+         // reset x and y
+         X_ = 0;
+         Y_ = 0;
       }
 
       private void Base_MouseLeave(object sender, MouseEventArgs e)
       {
+         // reset knob
          knobPosition.X = 0;
          knobPosition.Y = 0;
-         X_ = knobPosition.X;
-         Y_ = knobPosition.Y;
+
+         // update x and y
+         X_ = _lastRudder;
+         Y_ = _lastElevator;
+
+         // reset x and y
+         X_ = 0;
+         Y_ = 0;
       }
    }
 }

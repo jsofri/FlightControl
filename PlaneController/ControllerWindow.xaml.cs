@@ -23,36 +23,47 @@ namespace PlaneController
 
         private double _aileron;
 
-        Pushpin AirplanePin = new Pushpin();
+        private Pushpin _pin = new Pushpin();
+
+        private const double EPSILON = 0.00001;
 
 
-        // Ctor - gets a ViewModel object as a parameter.
-        public ControllerWindow(PlaneViewModel vm)
-        {
+
+       // Ctor - gets a ViewModel object as a parameter.
+       public ControllerWindow(PlaneViewModel vm)
+       {
             InitializeComponent();
             _vm = vm;
             this.DataContext = this._vm;
+
+            // set default values to sliders
             _throttle = ThrottleSlider.Value = 0.5;
             _aileron = AileronSlider.Value = 0;
 
-            // subscribe 
+            // subscribe to coords change
             _vm.PropertyChanged += UpdateCoordsPin;
             this.SetErrorEvent();
 
-            // pushpin
-            AirplanePin.Location = new Location(vm.VM_Latitude, vm.VM_Longitude);
-            AirplanePin.ToolTip = "Airplane";
-            AirplanePin.Margin = new Thickness(0, 0, 0, 37);
-            this.myMap.Children.Add(AirplanePin);
+            // add pushpin to map
+            _pin.Location = new Location(vm.VM_Latitude, vm.VM_Longitude);
+            _pin.ToolTip = "Airplane";
+            this.myMap.Children.Add(_pin);
         }
 
+        /*
+         * Update the pushpin's location on map and center the map view on the coords
+         */
         private void UpdateCoordsPin(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "VM_Latitude" || e.PropertyName == "VM_Longitude")
             {
                 this.myMap.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(delegate ()
                 {
-                    AirplanePin.Location = new Location(_vm.VM_Latitude, _vm.VM_Longitude);
+                    // update pushpin's location
+                    _pin.Location = new Location(_vm.VM_Latitude, _vm.VM_Longitude);
+
+                    // center map view
+                    myMap.Center = new Location(_vm.VM_Latitude, _vm.VM_Longitude);
                 }));
             }
         }
@@ -66,9 +77,9 @@ namespace PlaneController
         }
 
         /*
-            * Event handler for aileron slider object. gets called a lot.
-            * As a result, call to VM only if the difference from value is at least 0.05
-            */
+         * Event handler for aileron slider object. gets called a lot.
+         * As a result, call to VM only if the difference from value is at least 0.05
+         */
         private void AileronSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             double diff = AileronSlider.Value - _aileron;
@@ -82,9 +93,9 @@ namespace PlaneController
         }
 
         /*
-            * Event handler for throttle slider object. gets called a lot.
-            * As a result, call to VM only if the difference from value is at least 0.05
-            */
+         * Event handler for throttle slider object. gets called a lot.
+         * As a result, call to VM only if the difference from value is at least 0.05
+         */
         private void ThrottleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             double diff = ThrottleSlider.Value - _throttle;

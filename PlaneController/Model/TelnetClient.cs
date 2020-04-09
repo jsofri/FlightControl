@@ -192,7 +192,7 @@ namespace PlaneController.Model
             {
                 NotifyErrorHappened("NaN");
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 NotifyErrorHappened("CNC");
             }

@@ -26,20 +26,23 @@
         </Grid.ColumnDefinitions>
 
         <!-- Map -->
-        <map:Map x:Name="myMap" ZoomLevel="15" CredentialsProvider="AkLl-qrKNAoD1QHY1-6q0qgDBI-Qymjx_XSmdOdpK7yQdGi2AlMeALgAvfP4gUq5" Mode="Aerial" Center="{Binding VM_Coords}"
+        <map:Map x:Name="myMap" ZoomLevel="5" CredentialsProvider="AkLl-qrKNAoD1QHY1-6q0qgDBI-Qymjx_XSmdOdpK7yQdGi2AlMeALgAvfP4gUq5" Mode="Aerial" 
                  BorderThickness="20" BorderBrush="#FF514A4A" Grid.RowSpan="2"></map:Map>
-        <!--<map:Pushpin Location="{Binding VM_Coords}" Grid.RowSpan="2" Margin="0,0,0,37"/>-->
 
         <!-- Joystick -->
         <Viewbox StretchDirection="Both" Stretch="Uniform" Width="150" Grid.Row="1" Grid.Column="2">
-            <res:Joystick x:Name="Joystick" X_="{Binding VM_Rudder, Mode=OneWay}" Y_="{Binding VM_Elevator, Mode=OneWay}"></res:Joystick>
+            <res:Joystick x:Name="Joystick" X_="{Binding Path=VM_Rudder, Mode=TwoWay}" Y_="{Binding Path=VM_Elevator, Mode=TwoWay}"></res:Joystick>
         </Viewbox>
 
         <TextBlock DockPanel.Dock="Right" TextAlignment="Right" Width="400" RenderTransformOrigin="0.425,1.333">
-            <Run Text="Rudder (X) ="/>
+            <!--<Run Text="Rudder (X) ="/>
             <Run Text="{Binding Path=X_, ElementName=Joystick, Mode=OneWay}"/>
             <Run Text=", Elevator (Y) ="/>
-            <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>
+            <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>-->
+            <Run Text="Lat ="/>
+            <Run Text="{Binding Path=VM_Latitude}"/>
+            <Run Text=", Long ="/>
+            <Run Text="{Binding Path=VM_Longitude}"/>
         </TextBlock>
 
         <!-- Aileron -->
