@@ -34,16 +34,16 @@
             <res:Joystick x:Name="Joystick" X_="{Binding Path=VM_Rudder, Mode=TwoWay}" Y_="{Binding Path=VM_Elevator, Mode=TwoWay}"></res:Joystick>
         </Viewbox>
 
-        <TextBlock DockPanel.Dock="Right" TextAlignment="Right" Width="400" RenderTransformOrigin="0.425,1.333">
+        <!--<TextBlock DockPanel.Dock="Right" TextAlignment="Right" Width="400" RenderTransformOrigin="0.425,1.333">
             <Run Text="Rudder (X) ="/>
             <Run Text="{Binding Path=X_, ElementName=Joystick, Mode=OneWay}"/>
             <Run Text=", Elevator (Y) ="/>
             <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>
-            <!--<Run Text="Lat ="/>
+            <Run Text="Lat ="/>
             <Run Text="{Binding Path=VM_Latitude, Mode=OneWay}"/>
             <Run Text=", Long ="/>
-            <Run Text="{Binding Path=VM_Longitude, Mode=OneWay}"/>-->
-        </TextBlock>
+            <Run Text="{Binding Path=VM_Longitude, Mode=OneWay}"/>
+        </TextBlock>-->
 
         <!-- Aileron -->
         <Label Style="{StaticResource LabelStyle}" Grid.Row="2" HorizontalAlignment="Center" Content="Aileron" Margin="10.6,12.4,91.6,3" Width="57" Grid.Column="2" Grid.ColumnSpan="2"/>

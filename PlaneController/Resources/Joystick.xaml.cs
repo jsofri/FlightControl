@@ -116,7 +116,7 @@ namespace PlaneController.Resources
 
             if (x != 0)
             {
-                angle = Math.Tanh(y / x);
+                angle = Math.Atan(y / x);
                 System.Console.WriteLine("Angle: "+ (180 / Math.PI) * angle);
                 maxX = maxRadius * Math.Cos(angle);
                 maxY = maxRadius * Math.Sin(angle);
