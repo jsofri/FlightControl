@@ -1,0 +1,106 @@
+﻿<Window x:Class="PlaneController.ControllerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:map="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF"
+        xmlns:local="clr-namespace:PlaneController"
+        xmlns:res="clr-namespace:PlaneController.Resources"
+        mc:Ignorable="d"
+        x:Name="ControllerWindowName"
+        Title="PlaneController" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen"
+        Style="{StaticResource WindowStyle}"
+        >
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45*"/>
+            <RowDefinition Height="45*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="75*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="20*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Map -->
+        <map:Map x:Name="myMap" ZoomLevel="5" CredentialsProvider="AkLl-qrKNAoD1QHY1-6q0qgDBI-Qymjx_XSmdOdpK7yQdGi2AlMeALgAvfP4gUq5" Mode="Aerial" 
+                 BorderThickness="20" BorderBrush="#FF514A4A" Grid.RowSpan="2"></map:Map>
+
+        <!-- Joystick -->
+        <Viewbox StretchDirection="Both" Stretch="Uniform" Width="150" Grid.Row="1" Grid.Column="2">
+            <res:Joystick x:Name="Joystick" X_="{Binding Path=VM_Rudder, Mode=TwoWay}" Y_="{Binding Path=VM_Elevator, Mode=TwoWay}"></res:Joystick>
+        </Viewbox>
+
+        <!--<TextBlock DockPanel.Dock="Right" TextAlignment="Right" Width="400" RenderTransformOrigin="0.425,1.333">
+            <Run Text="Rudder (X) ="/>
+            <Run Text="{Binding Path=X_, ElementName=Joystick, Mode=OneWay}"/>
+            <Run Text=", Elevator (Y) ="/>
+            <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>
+            <Run Text="Lat ="/>
+            <Run Text="{Binding Path=VM_Latitude, Mode=OneWay}"/>
+            <Run Text=", Long ="/>
+            <Run Text="{Binding Path=VM_Longitude, Mode=OneWay}"/>
+        </TextBlock>-->
+
+        <!-- Aileron -->
+        <Label Style="{StaticResource LabelStyle}" Grid.Row="2" HorizontalAlignment="Center" Content="Aileron" Margin="10.6,12.4,91.6,3" Width="57" Grid.Column="2" Grid.ColumnSpan="2"/>
+        <DockPanel Grid.Row="1" Grid.Column="1" Margin="39.6,0,1.6,4" Grid.ColumnSpan="3" Height="53" VerticalAlignment="Bottom" Grid.RowSpan="2" HorizontalAlignment="Center" Width="158">
+            <Label x:Name="Aileron_TextBox" Style="{StaticResource ParameterNumber}" Content="{Binding ElementName=AileronSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}"  DockPanel.Dock="Bottom"
+                      Margin="57,10,58.6,-0.4" Height="25" Width="32" />
+            <Slider x:Name="AileronSlider" Maximum="1" Minimum="-1" Style="{StaticResource SliderStyle}" TickPlacement="TopLeft" TickFrequency="0.1" DockPanel.Dock="Top" Orientation="Horizontal"
+                    Height="26" Margin="17,0,16.6,0" HorizontalAlignment="Center" Width="140" ValueChanged="AileronSlider_ValueChanged" />
+        </DockPanel >
+
+        <!-- Throttle -->
+        <Label Style="{StaticResource LabelStyle}" Content="Throttle" Margin="592,0.2,41.8,161.6" RenderTransformOrigin="0.235,-0.081" Grid.ColumnSpan="3" Grid.Row="1"/>
+        <Label x:Name="Throttle_TextBox" Style="{StaticResource ParameterNumber}" Content="{Binding ElementName=ThrottleSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="2.8,25.2,3.2,140.6" Height="25"  Grid.Row="1" Grid.Column="1" Width="32" />
+        <Slider Maximum="1" Minimum="0" x:Name="ThrottleSlider" Style="{StaticResource SliderStyle}" TickPlacement="BottomRight" TickFrequency="0.1" Orientation="Vertical"
+                Margin="7.8,51.2,154.6,0.6" RenderTransformOrigin="0.389,0.492" Width="Auto"
+                Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ValueChanged="ThrottleSlider_ValueChanged" />
+
+        <!-- Flight Instruments-->
+        <Label Style="{StaticResource LabelTitleStyle}" Content="Flight Instruments" Margin="18.6,-7,10.6,155.8" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="3" Grid.Column="1"/>
+        <StackPanel Margin="589,21,112.6,188.6" Grid.RowSpan="2" Width="91.8" Grid.ColumnSpan="3">
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Altitude"/>
+            <Label/>
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Speed"/>
+            <Label/>
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Roll"/>
+            <Label/>
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Pitch"/>
+        </StackPanel>
+        <StackPanel Margin="39.8,21,27.6,188.6" Grid.RowSpan="2" Grid.Column="2" Width="91" HorizontalAlignment="Center">
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Heading Deg" Width="69"/>
+            <Label/>
+            <Label Style="{StaticResource LabelTitleStyle}" HorizontalAlignment="Center" FontSize="16" Content="GPS" Height="30" Margin="24,0,20,0" Width="48" FontWeight="Bold"/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Vertical Speed"/>
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Ground Speed"/>
+            <Label/>
+            <Label Style="{StaticResource LabelStyle}" HorizontalAlignment="Left" FontSize="10" Content="Altitude "/>
+        </StackPanel>
+        <Label Content="{Binding Path=VM_HeadingDeg}" Margin="112.8,30,2.6,133.8" Grid.Column="2" Style="{StaticResource ParameterNumber}" Height="25" Width="43"/>
+        <Label Content="{Binding Path=VM_GPSVerticalSpeed}" Margin="111.8,95,3.6,68.8" Grid.Column="2" Style="{StaticResource ParameterNumber}" Height="25" Width="43"/>
+        <Label Content="{Binding Path=VM_GPSGroundSpeed}" Margin="111.8,128,3.6,35.8" Grid.Column="2" Style="{StaticResource ParameterNumber}" Height="25" Width="43"/>
+        <Label Content="{Binding Path=VM_GPSAltitude}" Margin="111.8,162,3.6,1.8" Grid.Column="2" Style="{StaticResource ParameterNumber}" Height="25" Width="43"/>
+        <Label Content="{Binding Path=VM_PitoAltitude}" Margin="38.8,30,116.6,133.8" Grid.Column="1" Style="{StaticResource ParameterNumber}" Height="25" Grid.ColumnSpan="2"/>
+        <Label Content="{Binding Path=VM_PitoSpeed}" Margin="38.8,73,116.6,90.8" Grid.Column="1" Style="{StaticResource ParameterNumber}" Height="25" Grid.ColumnSpan="2"/>
+        <Label Content="{Binding Path=VM_Roll}" Margin="38.8,115,116.6,48.8" Grid.Column="1" Style="{StaticResource ParameterNumber}" Height="25" Grid.ColumnSpan="2"/>
+        <Label Content="{Binding Path=VM_Pitch}" Margin="39.8,159,116.6,4.8" Grid.Column="1" Style="{StaticResource ParameterNumber}" Height="25" Grid.ColumnSpan="2"/>
+
+        <!-- Errors-->
+        <Label x:Name="ErrorsLabel" Content="Errors:" Style="{StaticResource LabelTitleStyle}" HorizontalAlignment="Left" Margin="52,2.4,0,0" Grid.Row="2"
+               VerticalAlignment="Top"/>
+        <ComboBox x:Name="ErrorsComboBox" HorizontalAlignment="Left" Margin="123,11.4,0,0" Grid.Row="2" VerticalAlignment="Top" Width="454"
+                  ItemsSource="{Binding VM_Errors}" SelectedItem="{Binding VM_Errors[0]}" DropDownOpened="ErrorsBox_Opened"/>
+    </Grid>
+</Window>
