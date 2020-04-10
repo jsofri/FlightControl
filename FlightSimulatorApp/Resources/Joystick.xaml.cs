@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace PlaneController.Resources
+namespace FlightSimulator.Resources
 {
     /*
      * Class that serves as a the code-behind of the Joystick.

@@ -1,10 +1,10 @@
-using PlaneController.Model;
+using FlightSimulator.Model;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace PlaneController.ViewModel
+namespace FlightSimulator.ViewModel
 {
     /*
      * Class that serve as a ViewModel layer to transfer data in MVVM.

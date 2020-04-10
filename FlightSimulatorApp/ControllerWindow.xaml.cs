@@ -1,11 +1,11 @@
 ﻿using Microsoft.Maps.MapControl.WPF;
-using PlaneController.ViewModel;
+using FlightSimulator.ViewModel;
 using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 
-namespace PlaneController
+namespace FlightSimulator
 {
 
     /*

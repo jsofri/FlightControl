@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
 
-namespace PlaneController.Model
+namespace FlightSimulator.Model
 {
 
     /*

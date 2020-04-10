@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PlaneController
+namespace FlightSimulator
 {
     /*
      * Class for showing errors to user in a new window.

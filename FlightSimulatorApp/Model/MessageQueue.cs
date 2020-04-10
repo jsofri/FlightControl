@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace PlaneController.Model
+namespace FlightSimulator.Model
 {
 
     /*

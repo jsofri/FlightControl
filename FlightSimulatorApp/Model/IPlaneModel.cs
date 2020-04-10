@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace PlaneController.Model
+namespace FlightSimulator.Model
 {
     /*
      * Interface for a plane that serves as a model in MVVM architecture.

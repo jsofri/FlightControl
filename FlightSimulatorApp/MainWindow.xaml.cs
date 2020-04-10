@@ -1,9 +1,9 @@
-﻿using PlaneController.Model;
-using PlaneController.ViewModel;
+﻿using FlightSimulator.Model;
+using FlightSimulator.ViewModel;
 using System;
 using System.Windows;
 
-namespace PlaneController
+namespace FlightSimulator
 {
     /*
      * Class for main window - window that asks from user ip & port.
