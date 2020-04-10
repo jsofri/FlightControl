@@ -26,8 +26,8 @@ namespace PlaneController.ViewModel
         public string VM_PitoAltitude { get { return _model.PitoAltitude.ToString("n2"); } }
         public string VM_Roll { get { return _model.Roll.ToString("n2"); } }
         public string VM_Pitch { get { return _model.Pitch.ToString("n2"); } }
-        public double VM_Latitude { get { return _model.Latitude; } set { _model.SetLatitude(value); } }
-        public double VM_Longitude { get { return _model.Longitude; } set { _model.SetLongitude(value); } }
+        public double VM_Latitude { get { return _model.Latitude; } }
+        public double VM_Longitude { get { return _model.Longitude; } }
         public double VM_Rudder
         {
             set

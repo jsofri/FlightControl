@@ -160,16 +160,12 @@ namespace PlaneController.Model
                 {
                     _latitude = FixedValue(value, -90, 90);
 
-                    // fix latitude if needed
-                    FixLatitude(value);
-
-                    if (Math.Abs(_latitude - value) <= 2)
+                    if (Math.Abs(_latitude - value) <= EPSILON)
                     {
                         NotifyPropertyChanged("Latitude");
                     }
                     else
                     {
-                        System.Console.WriteLine("***********************   " + value);
                         NotifyPropertyChanged("NIE");
                     }
                 }
@@ -186,36 +182,15 @@ namespace PlaneController.Model
                 {
                     _longitude = FixedValue(value, -180, 180);
 
-                    // fix longitude if needed
-                    FixLongitude(value);
-
-                    if (Math.Abs(_longitude - value) <= 2)
+                    if (Math.Abs(_longitude - value) <= EPSILON)
                     {
                         NotifyPropertyChanged("Longitude");
                     }
                     else
                     {
-                        System.Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$   " + value);
                         NotifyPropertyChanged("NIE");
                     }
                 }
-            }
-        }
-        public void FixLatitude(double value)
-        {
-            // fix latitude
-            if (value > 90 || value < -90)
-            {
-                SetLatitude(-value);
-            }
-        }
-
-        public void FixLongitude(double value)
-        {
-            // fix latitude
-            if (value > 180 || value < -180)
-            {
-                SetLongitude(-value);
             }
         }
 
@@ -300,24 +275,6 @@ namespace PlaneController.Model
         {
             GenericSetMessage(value, 0, 1, "controls/engines/current-engine/throttle");
         }
-
-        /*
-         * Set value of Latitude using helper function.
-         * Range of Latitude is [-90, 90].
-         */
-         public void SetLatitude(double value)
-         {
-            GenericSetMessage(value, -90, 90, "position/latitude-deg");
-         }
-
-         /*
-         * Set value of Longitude using helper function.
-         * Range of Longitude is [-180, 180].
-         */
-         public void SetLongitude(double value)
-         {
-            GenericSetMessage(value, -180, 180, "position/longitude-deg");
-         }
 
          /*
           * Helper function for setting a value of a component in plane.

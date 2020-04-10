@@ -47,11 +47,5 @@ namespace PlaneController.Model
 
         // Valid values are [-1, 1].
         void SetRudder(double value);
-
-         // Valid values are [-90, 90].
-         void SetLatitude(double value);
-
-         // Valid values are [-180, 180].
-         void SetLongitude(double value);
    }
 }

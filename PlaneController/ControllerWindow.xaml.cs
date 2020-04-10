@@ -101,7 +101,7 @@ namespace PlaneController
             double diff = ThrottleSlider.Value - _throttle;
 
             // If diff is at least 0.05 (absolute value).
-            if (diff >= 0.05 || diff <= -0.05)
+            if (Math.Abs(diff) >= 0.05)
             {
                 _throttle = ThrottleSlider.Value;
                 _vm.SetThrottle(_throttle);

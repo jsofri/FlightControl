@@ -1,129 +1,165 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PlaneController.Resources
 {
-   /// <summary>
-   /// Interaction logic for Joystick.xaml
-   /// </summary>
-   public partial class Joystick : UserControl//, INotifyPropertyChanged
-   {
-     
-      private Point initPos;
-      private double _lastElevator;
-      private double _lastRudder;
-      //public event PropertyChangedEventHandler PropertyChanged;
-      public static readonly DependencyProperty X_Property = DependencyProperty.Register(nameof(X_), typeof(double), typeof(Joystick), new PropertyMetadata((double) 0));
-      public static readonly DependencyProperty Y_Property = DependencyProperty.Register(nameof(Y_), typeof(double), typeof(Joystick), new PropertyMetadata((double) 0));
+    /*
+     * Class that serves as a the code-behind of the Joystick.
+     * 
+     * author: Rony.
+     * date: 03.28.20
+     */
+    public partial class Joystick : UserControl
+    {
 
+        private Point _InitPos;
+        private const double EPSILON = 0.00001;
+        public static readonly DependencyProperty X_Property = DependencyProperty.Register(nameof(X_), typeof(double), typeof(Joystick), new PropertyMetadata((double)0));
+        public static readonly DependencyProperty Y_Property = DependencyProperty.Register(nameof(Y_), typeof(double), typeof(Joystick), new PropertyMetadata((double)0));
 
-      public Joystick()
-      {
-         InitializeComponent();
-      }
+        // Ctor
+        public Joystick()
+        {
+            InitializeComponent();
+        }
 
-      public double X_
-      {
-         get
-         {
-            return (double)GetValue(X_Property);
-         }
-         set
-         {
-            SetValue(X_Property, value);
-         }
-      }
-
-      public double Y_
-      {
-         get
-         {
-            return (double)GetValue(Y_Property);
-         }
-         set
-         {
-            SetValue(Y_Property, value);
-         }
-      }
-
-      public void centerKnob_Completed (object sender, EventArgs e)
-      {
-      }
-
-      private void Knob_Clicked(object sender, MouseButtonEventArgs e)
-      {
-         // save the coords of the mouse when the knob was clicked
-         initPos = e.GetPosition(this);
-      }
-
-      private void Knob_Moving(object sender, MouseEventArgs e)
-      {
-         if (e.LeftButton == MouseButtonState.Pressed)
-         {
-            var x = knobPosition.X;
-            var y = knobPosition.Y;
-            var maxRadius = Base.Width / 4;
-            var radius = Math.Sqrt(x * x + y * y);
-            if (radius <= maxRadius)
+        // Rudder property
+        public double X_
+        {
+            get
             {
-               knobPosition.X = e.GetPosition(this).X - initPos.X;
-               knobPosition.Y = e.GetPosition(this).Y - initPos.Y;
+                return (double)GetValue(X_Property);
+            }
+            set
+            {
+                SetValue(X_Property, value);
+            }
+        }
 
-               _lastRudder = knobPosition.X / maxRadius;
-               _lastElevator = - knobPosition.Y / maxRadius;
+        // Elevator property
+        public double Y_
+        {
+            get
+            {
+                return (double)GetValue(Y_Property);
+            }
+            set
+            {
+                SetValue(Y_Property, value);
+            }
+        }
 
-               _lastRudder = (_lastRudder > 1) ? 1 : _lastRudder;
-               _lastRudder = (_lastRudder < -1) ? -1 : _lastRudder;
-               _lastElevator = (_lastElevator > 1) ? 1 : _lastElevator;
-               _lastElevator = (_lastElevator < -1) ? -1 : _lastElevator;
-               //PropertyChanged(this, new PropertyChangedEventArgs("Y_"));
+        // the on-complete event - should stay empty
+        public void centerKnob_Completed(object sender, EventArgs e) { }
+
+        // on click event
+        private void Knob_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            // save the coords of the mouse when the knob was clicked
+            _InitPos = e.GetPosition(this);
+            Knob.CaptureMouse();
+        }
+
+        // on mouse move event
+        private void Knob_Moving(object sender, MouseEventArgs e)
+        {
+            // check if left button is being pressed
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                KnobInRange(e);
+
+                var maxRadius = Base.Width / 4;
+
+                // normalize the x and y to be in the range [-1, 1]
+                X_ = knobPosition.X / maxRadius;
+                Y_ = -knobPosition.Y / maxRadius;
+
+                // keep them in range [-1, 1]
+                X_ = (X_ > 1) ? 1 : X_;
+                X_ = (X_ < -1) ? -1 : X_;
+                Y_ = (Y_ > 1) ? 1 : Y_;
+                Y_ = (Y_ < -1) ? -1 : Y_;
+            }
+        }
+
+        // when the mouse button is released
+        private void Base_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Knob.ReleaseMouseCapture();
+            Reset();
+        }
+
+        // when the mouse leaves
+        private void Base_MouseLeave(object sender, MouseEventArgs e)
+        {
+            // check if left button is being pressed
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                KnobInRange(e);
+            }
+        }
+
+        // put the knob inside the base
+        private void KnobInRange(MouseEventArgs e)
+        {
+
+            var maxRadius = Base.Width / 4;
+            knobPosition.X = e.GetPosition(this).X - _InitPos.X;
+            knobPosition.Y = e.GetPosition(this).Y - _InitPos.Y;
+
+            var x = knobPosition.X;
+            var y = -knobPosition.Y;
+            var radius = Math.Sqrt(x * x + y * y);
+            double angle, maxX, maxY;
+
+            if (x != 0)
+            {
+                angle = Math.Tanh(y / x);
+                System.Console.WriteLine("Angle: "+ (180 / Math.PI) * angle);
+                maxX = maxRadius * Math.Cos(angle);
+                maxY = maxRadius * Math.Sin(angle);
+            }
+            else
+            {
+                maxX = 0;
+                maxY = maxRadius;
             }
 
-         }
-      }
+            if (radius > maxRadius)
+            {
+                if (x >= 0 && y >= 0)
+                {
+                    knobPosition.X = maxX;
+                    knobPosition.Y = -maxY;
+                }
+                else if (x <= 0 && y >= 0)
+                {
+                    knobPosition.X = -maxX;
+                    knobPosition.Y = maxY;
+                }
+                else if (x <= 0 && y <= 0)
+                {
+                    knobPosition.X = -maxX;
+                    knobPosition.Y = maxY;
+                }
+                else
+                {
+                    knobPosition.X = maxX;
+                    knobPosition.Y = -maxY;
+                }
+            }
+        }
 
-      private void Base_MouseUp(object sender, MouseButtonEventArgs e)
-      {
-         // reset knob
-         knobPosition.X = 0;
-         knobPosition.Y = 0;
-
-         // update x and y
-         X_ = _lastRudder;
-         Y_ = _lastElevator;
-
-         // reset x and y
-         X_ = 0;
-         Y_ = 0;
-      }
-
-      private void Base_MouseLeave(object sender, MouseEventArgs e)
-      {
-         // reset knob
-         knobPosition.X = 0;
-         knobPosition.Y = 0;
-
-         // update x and y
-         X_ = _lastRudder;
-         Y_ = _lastElevator;
-
-         // reset x and y
-         X_ = 0;
-         Y_ = 0;
-      }
-   }
+        private void Reset() {
+            // reset knob
+            knobPosition.X = 0;
+            knobPosition.Y = 0;
+            
+            // reset properties
+            X_ = 0;
+            Y_ = 0;
+        }
+    }
 }

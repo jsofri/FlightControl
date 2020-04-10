@@ -35,14 +35,14 @@
         </Viewbox>
 
         <TextBlock DockPanel.Dock="Right" TextAlignment="Right" Width="400" RenderTransformOrigin="0.425,1.333">
-            <!--<Run Text="Rudder (X) ="/>
+            <Run Text="Rudder (X) ="/>
             <Run Text="{Binding Path=X_, ElementName=Joystick, Mode=OneWay}"/>
             <Run Text=", Elevator (Y) ="/>
-            <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>-->
-            <Run Text="Lat ="/>
-            <Run Text="{Binding Path=VM_Latitude}"/>
+            <Run Text="{Binding Path=Y_, ElementName=Joystick, Mode=OneWay}"/>
+            <!--<Run Text="Lat ="/>
+            <Run Text="{Binding Path=VM_Latitude, Mode=OneWay}"/>
             <Run Text=", Long ="/>
-            <Run Text="{Binding Path=VM_Longitude}"/>
+            <Run Text="{Binding Path=VM_Longitude, Mode=OneWay}"/>-->
         </TextBlock>
 
         <!-- Aileron -->
@@ -58,7 +58,7 @@
         <Label Style="{StaticResource LabelStyle}" Content="Throttle" Margin="592,0.2,41.8,161.6" RenderTransformOrigin="0.235,-0.081" Grid.ColumnSpan="3" Grid.Row="1"/>
         <Label x:Name="Throttle_TextBox" Style="{StaticResource ParameterNumber}" Content="{Binding ElementName=ThrottleSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" 
                      Margin="2.8,25.2,3.2,140.6" Height="25"  Grid.Row="1" Grid.Column="1" Width="32" />
-        <Slider Maximum="1" Minimum="-1" x:Name="ThrottleSlider" Style="{StaticResource SliderStyle}" TickPlacement="BottomRight" TickFrequency="0.1" Orientation="Vertical"
+        <Slider Maximum="1" Minimum="0" x:Name="ThrottleSlider" Style="{StaticResource SliderStyle}" TickPlacement="BottomRight" TickFrequency="0.1" Orientation="Vertical"
                 Margin="7.8,51.2,154.6,0.6" RenderTransformOrigin="0.389,0.492" Width="Auto"
                 Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ValueChanged="ThrottleSlider_ValueChanged" />
 
