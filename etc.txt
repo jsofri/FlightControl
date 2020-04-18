@@ -1,0 +1,5 @@
+205433329, Yehonatan Sofri
+319384657, Rony Utevsky
+Special Properties: -errors are diaplayd in combo box that contains time of each error. When an error occurs, labal "Errors" is painted red.
+					-In start of app, you can reset port & ip back to default values. Plus we check given ip & port paramateres are valid.
+					-Cool UI.
