@@ -5,7 +5,7 @@ Program enable to operate basic aircraft controls, the "plane" itself .run on a 
 ![app window](https://github.com/yehonatansofri/FlightControl/blob/master/out/app_window.PNG?raw=true)
 
 ### Program Architecture
-![app window](https://github.com/yehonatansofri/FlightControl/blob/master/out/program_uml.PNG?raw=true)
+![app window](https://github.com/yehonatansofri/FlightControl/blob/master/out/prog_uml.PNG?raw=true)
 
 ### Requirements
 FlightControl requires .NET framework 4 (at least version 4.6). Compilation with Visual Stuidio 2019.
