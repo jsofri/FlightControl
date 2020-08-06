@@ -14,7 +14,7 @@ After download completion, double-click on `FlightSimulator.sln`
 
 ### Run
 When running the application, the first window will ask you to write the server IP and port.
-This is the address of server running the plane. The default is for local machine on **port 5402**.
+This is the address of the server "runs" the plane. The default is for local machine on **port 5402**.
 If you just want to move the controls without server, press start after the "no server" error.
 
 ### Error handling
